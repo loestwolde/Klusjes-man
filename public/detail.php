@@ -2,9 +2,6 @@
 <?php
 include("../src/customer.php");
 
-echo "<pre>";
-print_r($_GET);
-echo "</pre>";
 
 if(isset($_GET['klant_id'])){
     $customer = new Customer();

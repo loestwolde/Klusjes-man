@@ -10,6 +10,11 @@ class Database
         $this->connectie = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8", DB_USER, DB_PASS);
     }
 
+    public function getlastid()
+    {
+        return $this->connectie->lastInsertId();
+    }
+
     public function voerQueryUit($query, $params = []) 
     {
         // Check if the query is a SELECT query
