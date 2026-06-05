@@ -4,7 +4,7 @@ include('../src/customer.php');
 $customer = new Customer();
 $allCustomers = $customer->getAllCustomers();
 
-echo "<h1>Klanten</h1>";
+echo "<h1>Weergave van klanten</h1>";
 echo "<a href=toevoegen.php>Toevoegen</a>";
 echo "<table border='1'>
         <tr>
