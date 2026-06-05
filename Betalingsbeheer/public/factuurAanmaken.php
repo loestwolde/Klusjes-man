@@ -224,15 +224,12 @@ if (isset($_POST['bereken'])) {
     Werkzaamheden:
     € <?= number_format($werk, 2) ?>
     <br>
-
     Materialen:
     € <?= number_format($materiaalKosten, 2) ?>
     <br>
-
     BTW (21%):
     € <?= number_format($btw, 2) ?>
     <br>
-
     <h2>
         Totaal:
         € <?= number_format($totaal, 2) ?>
