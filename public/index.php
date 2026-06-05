@@ -24,12 +24,12 @@ echo "<table border='1'>
                 echo "<td>" . $customer['klant_id'] . "</td>";
                 echo "<td>" . $customer['voorletters'] . " " . $customer['achternaam'] . "</td>";
                 echo "<td>" . $customer['aanhef'] . "</td>";
-                // echo "<td>" . $customer['email'] . " " . $customer['postalCode'] . " " . $customer['city'] . " " . $customer['state'] . " " . $customer['country'] . "</td>";
                 echo "<td>" . $customer['telefoon'] . "</td>";
                 echo "<td>" . $customer['email'] . "</td>";
                 echo "<td><a href=detail.php?klant_id=" . $customer['klant_id'] . ">Bekijk</a></td>";
                 echo "<td><a href=update.php?klant_id=" . $customer['klant_id'] . ">Bewerken</a></td>";
                 echo "<td><a href=delete.php?klant_id=" . $customer['klant_id'] . ">Verwijderen</a></td>";  
+                
             echo "</tr>";
         }
 echo "</table>";

@@ -21,4 +21,5 @@ if(isset($_GET['klant_id'])){
 
 <a href="update.php?klant_id=<?php echo $customerData[0]['klant_id']; ?>">Bewerken</a><br/>
 <a href="delete.php?klant_id=<?php echo $customerData[0]['klant_id']; ?>">Verwijderen</a><br/>
+<a href="register_klus.php?klant_id=<?php echo $customerData[0]['klant_id']; ?>">klus registratie</a><br/>
 <a href="index.php">Terug naar overzicht</a>
