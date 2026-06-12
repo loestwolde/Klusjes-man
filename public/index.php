@@ -1,5 +1,14 @@
+<html>
+<head>
+    <link rel="stylesheet" href="../style/style.css">
+</head>
+<body>
+<img src="../images/logoKlusjesman.png" alt="Klusjesman Logo" class="logo">
 <?php
+
+
 include('../src/customer.php');
+
 
 $customer = new Customer();
 $allCustomers = $customer->getAllCustomers();
@@ -33,3 +42,7 @@ echo "<table border='1'>
             echo "</tr>";
         }
 echo "</table>";
+?>
+
+
+</body>

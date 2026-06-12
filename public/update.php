@@ -1,3 +1,7 @@
+
+<link rel="stylesheet" href="../style/style.css">
+<img src="../images/logoKlusjesman.png" alt="Klusjesman Logo" class="logo">
+
 <?php
 include("../src/customer.php");
 
