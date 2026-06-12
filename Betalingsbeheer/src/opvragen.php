@@ -45,5 +45,16 @@ class KlantenOpvragen extends Database {
 
         return parent::voerQueryUit($query, [$id]);
     }
+
+    public function haalKlantenOp()
+{
+    $query = "
+    SELECT klant_id, voorletters, achternaam
+    FROM klanten
+    ORDER BY achternaam
+    ";
+
+    return parent::voerQueryUit($query);
+}
 }
 ?>

@@ -12,27 +12,48 @@ class Database {
     }
 
     public function voerQueryUit($query, $params = [])
-    {
-        $statement = $this->connectie->prepare($query);
-        $statement->execute($params);
+{
+    $statement = $this->connectie->prepare($query);
+    $statement->execute($params);
 
-        if (str_contains($query, 'SELECT')){
+    if (str_contains($query, 'SELECT')) {
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    return $statement->rowCount();
+}
+
+public function laatsteInsertId()
+{
+    return $this->connectie->lastInsertId();
+}
+
+    //public function voerQueryUit($query, $params = [])
+    //{
+     //   $statement = $this->connectie->prepare($query);
+//  $statement->execute($params);
+
+    //    if (str_contains($query, 'SELECT')){
             // dit krijg je als array terug uit de tabel, want dit is wel met SELECT
             // je krijgt dus rijen uit de tabel terug
-            $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+      //      return  $statement->fetchAll(PDO::FETCH_ASSOC);
 
-            return $result;
-        }
+           // return $result;
+      //  }
 
-        else {
+    //    return [
+    //    'rowCount' => $statement->rowCount(),
+    //    'lastId' => $this->connectie->lastInsertId()];
+
+        //else {
             // dit is als de query geen SELECT statement is
             // dit zijn dus het aantal rijen dat gewijzigd, toegevoegd of verwijderd wordt
             // de rowCount wordt dan dus anders
-            $result = $statement->rowCount();
+          //  $result = $statement->rowCount();
 
-            return $result;
-        }
-    }
+           // return $result;
+        
+   // }
 
     public function sluitVerbinding(){
         $this->connectie = null;

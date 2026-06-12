@@ -1,256 +1,122 @@
 <?php
 
-session_start();
-
 include_once("../src/facturen.php");
 
 $facturen = new Facturen();
 
-$werkzaamheden = $facturen->haalWerkzaamhedenOp();
-$artikelen = $facturen->haalArtikelenOp();
+$klussen = $facturen->haalKlussenOp();
 
-if (!isset($_SESSION['materialen'])) {
-    $_SESSION['materialen'] = [];
-}
+$selectedKlusId = $_POST['klus_id'] ?? null;
 
+$klus = null;
+$uren = null;
+$tarief = null;
+$voorrijtijd = null;
 
-if (isset($_POST['nieuwe_factuur'])) {
+if ($selectedKlusId) {
 
-    unset($_SESSION['materialen']);
+    $klusResultaat = $facturen->haalKlusOp($selectedKlusId);
+    $klus = $klusResultaat[0] ?? null;
 
-    header("Location: factuurAanmaken.php");
-    exit;
-}
-
-/*
-----------------------------------
-MATERIAAL TOEVOEGEN
-----------------------------------
-*/
-if (isset($_POST['toevoegen'])) {
-
-    $artikel_id = $_POST['artikel_id'];
-    $aantal = $_POST['aantal'];
-
-    foreach ($artikelen as $artikel) {
-
-        if ($artikel['artikel_id'] == $artikel_id) {
-
-            $_SESSION['materialen'][] = [
-
-                'naam' => $artikel['naam'],
-                'prijs' => $artikel['prijs'],
-                'aantal' => $aantal,
-                'voorraad' => $artikel['voorraad']
-
-            ];
-        }
+    if ($klus) {
+        $uren = $klus['uren'];
+        $tarief = $klus['tarief'];
+        $voorrijtijd = $klus['voorrijtijd'];
     }
 }
 
-$werk = 0;
-$materiaalKosten = 0;
-$btw = 0;
-$totaal = 0;
+if (isset($_POST['opslaan']) && $klus) {
 
-/*
-----------------------------------
-BEREKENEN
-----------------------------------
-*/
-if (isset($_POST['bereken'])) {
-
-    $werkzaamheid_id = $_POST['werkzaamheid_id'];
+    // waarden uit form (mogen aangepast zijn)
     $uren = $_POST['uren'];
+    $tarief = $_POST['tarief'];
+    $voorrijtijd = $_POST['voorrijtijd'];
 
-    foreach ($werkzaamheden as $werkzaamheid) {
+    // werk + voorrijtijd
+    $werkKosten = $uren * $tarief;
+    $voorrijtijdKosten = $voorrijtijd * $tarief;
 
-        if ($werkzaamheid['werkzaamheid_id'] == $werkzaamheid_id) {
+    // materialen
+    $materialen = $facturen->haalKlusMaterialenOp($selectedKlusId);
 
-            $werk =
-                $uren *
-                $werkzaamheid['prijs_per_stuk'];
-        }
+    $materiaalKosten = 0;
+
+    foreach ($materialen as $materiaal) {
+        $materiaalKosten += $materiaal['aantal'] * $materiaal['prijs'];
     }
 
-    foreach ($_SESSION['materialen'] as $materiaal) {
-
-        $materiaalKosten +=
-            $materiaal['aantal']
-            * $materiaal['prijs'];
-    }
-
-    $subtotaal = $werk + $materiaalKosten;
-
+    // totaal
+    $subtotaal = $werkKosten + $voorrijtijdKosten + $materiaalKosten;
     $btw = $subtotaal * 0.21;
+    $eindbedrag = $subtotaal + $btw;
 
-    $totaal = $subtotaal + $btw;
+    // factuur maken
+    $factuur_id = $facturen->maakFactuur(
+    $klus['klant_id'],
+    $klus['uren'],
+    $klus['voorrijtijd'],
+    $eindbedrag
+);
+
+    // werkregel
+    $facturen->maakFactuurRegel(
+        $factuur_id,
+        $klus['omschrijving'],
+        $uren,
+        $tarief
+    );
+
+    // materialen
+    foreach ($materialen as $materiaal) {
+        $facturen->maakFactuurRegel(
+            $factuur_id,
+            $materiaal['naam'],
+            $materiaal['aantal'],
+            $materiaal['prijs']
+        );
+    }
+
+    echo "Factuur opgeslagen!";
 }
 
 ?>
 
-<html>
-
-<head>
-    <title>Factuur aanmaken</title>
-</head>
-
-<body>
-
-<h2>Factuur aanmaken</h2>
+<h2>Factuur maken</h2>
 
 <form method="post">
 
-    <h3>Werkzaamheid</h3>
+<select name="klus_id" onchange="this.form.submit()">
 
-    <select name="werkzaamheid_id">
-
-        <?php foreach ($werkzaamheden as $werkzaamheid) { ?>
-
-            <option value="<?= $werkzaamheid['werkzaamheid_id'] ?>">
-
-                <?= $werkzaamheid['omschrijving'] ?>
-                (€ <?= $werkzaamheid['prijs_per_stuk'] ?> per uur)
-
-            </option>
-
-        <?php } ?>
-
-    </select>
-
-    <br><br>
-
-    Aantal uren:
-
-    <input
-        type="number"
-        name="uren"
-        min="1"
-        value="<?= $_POST['uren'] ?? '' ?>"
-    >
-
-    <hr>
-
-    <h3>Materiaal toevoegen</h3>
-
-    <select name="artikel_id">
-
-        <?php foreach ($artikelen as $artikel) { ?>
-
-            <option value="<?= $artikel['artikel_id'] ?>">
-
-                <?= $artikel['naam'] ?>
-
-                (voorraad:
-                <?= $artikel['voorraad'] ?>)
-
-                (€ <?= $artikel['prijs'] ?>)
-
-            </option>
-
-        <?php } ?>
-
-    </select>
-
-    Aantal:
-
-    <input
-        type="number"
-        name="aantal"
-        min="1"
-    >
-
-    <button
-        type="submit"
-        name="toevoegen">
-        Toevoegen
-    </button>
-
-    <hr>
-
-    <h3>Toegevoegde materialen</h3>
-
-    <table border="1">
-
-        <tr>
-            <th>Naam</th>
-            <th>Aantal</th>
-            <th>Prijs</th>
-            <th>Totaal</th>
-        </tr>
-
-        <?php foreach ($_SESSION['materialen'] as $materiaal) { ?>
-
-            <tr>
-
-                <td>
-                    <?= $materiaal['naam'] ?>
-                </td>
-
-                <td>
-                    <?= $materiaal['aantal'] ?>
-                </td>
-
-                <td>
-                    € <?= $materiaal['prijs'] ?>
-                </td>
-
-                <td>
-                    € <?= $materiaal['aantal'] * $materiaal['prijs'] ?>
-                </td>
-
-            </tr>
-
-        <?php } ?>
-
-    </table>
-
-    <br>
-
-    <button
-        type="submit"
-        name="bereken">
-        BTW berekenen
-    </button>
-
-</form>
-
-<?php if ($totaal > 0) { ?>
-
-    <hr>
-
-    <h3>Overzicht</h3>
-
-    Werkzaamheden:
-    € <?= number_format($werk, 2) ?>
-    <br>
-    Materialen:
-    € <?= number_format($materiaalKosten, 2) ?>
-    <br>
-    BTW (21%):
-    € <?= number_format($btw, 2) ?>
-    <br>
-    <h2>
-        Totaal:
-        € <?= number_format($totaal, 2) ?>
-    </h2>
-
-    <button>
-        Factuur opslaan
-    </button>
-
+<?php foreach ($klussen as $k) { ?>
+    <option value="<?= $k['klus_id'] ?>"
+        <?= ($selectedKlusId == $k['klus_id']) ? 'selected' : '' ?>>
+        <?= $k['omschrijving'] ?> - <?= $k['datum'] ?>
+    </option>
 <?php } ?>
 
-<hr>
+</select>
 
-<form method="post">
+<br><br>
+<h3>Kort overzicht van de klus:</h3>
 
-    <button type="submit" name="nieuwe_factuur">
-        Factuur leegmaken
-    </button>
+Uren gewerkt:
+<input type="number" name="uren" value="<?= $uren ?>">
+
+<br><br>
+
+Tarief:
+<input type="number" step="0.01" name="tarief" value="<?= $tarief ?>">
+
+<br><br>
+
+Voorrijtijd (in halve uren):
+<input type="number" name="voorrijtijd" value="<?= $voorrijtijd ?>">
+
+<br><br>
+
+<button type="submit" name="opslaan">Maak factuur</button>
 
 </form>
 
-</body>
-
-</html>
+<br>
+<a href="zoeken.php">Terug</a>

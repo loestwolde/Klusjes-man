@@ -3,55 +3,113 @@
 include("../src/opvragen.php");
 include("../src/facturen.php");
 
+
 $klanten = new KlantenOpvragen();
 $facturenClass = new Facturen();
 
-// klant_id uit URL halen
-$id = $_GET['id'];
+
+$id = $_GET['id'] ?? null;
+
+
+if($id === null){
+    echo "Geen klant geselecteerd.";
+    exit;
+}
+
+
 
 // klantgegevens ophalen
-$resultaten = $klanten->haalKlantInfoOp($id);
+
+$resultaten =
+    $klanten->haalKlantInfoOp($id);
+
+
 
 // facturen ophalen
-$facturen = $facturenClass->haalFacturenOp($id);
+
+$facturen =
+    $facturenClass->haalFacturenOp($id);
+
 
 ?>
+
 
 <html>
 
+<head>
+
+<title>Klantinformatie</title>
+
+</head>
+
+
+<body>
+
+
+
 <h2>Klantinformatie</h2>
+
 
 <table border="1">
 
+
 <tr>
-    <th>Naam</th>
-    <th>Adres</th>
-    <th>Woonplaats</th>
-    <th>Periode</th>
-    <th>Status</th>
+
+<th>Naam</th>
+<th>Adres</th>
+<th>Woonplaats</th>
+<th>Periode</th>
+<th>Status</th>
+
 </tr>
 
-<?php
 
-foreach ($resultaten as $klant) {
 
-    echo "<tr>";
+<?php foreach($resultaten as $klant){ ?>
 
-    echo "<td>" . $klant['naam'] . "</td>";
-    echo "<td>" . $klant['adres'] . "</td>";
-    echo "<td>" . $klant['woonplaats'] . "</td>";
-    echo "<td>" . $klant['periode'] . "</td>";
-    echo "<td>" . $klant['status'] . "</td>";
 
-    echo "</tr>";
-}
+<tr>
 
-?>
+
+<td>
+<?= $klant['naam'] ?>
+</td>
+
+
+<td>
+<?= $klant['adres'] ?>
+</td>
+
+
+<td>
+<?= $klant['woonplaats'] ?>
+</td>
+
+
+<td>
+<?= $klant['periode'] ?>
+</td>
+
+
+<td>
+<?= $klant['status'] ?>
+</td>
+
+
+
+</tr>
+
+
+<?php } ?>
+
 
 </table>
 
-<br>
-<br>
+
+
+<br><br>
+
+
 
 <h2>Facturen</h2>
 
@@ -60,41 +118,53 @@ foreach ($resultaten as $klant) {
 <tr>
     <th>Factuurdatum</th>
     <th>Totaalbedrag</th>
-    <th>Betaald</th>
+    <th>Betaalstatus</th>
     <th>Details</th>
 </tr>
 
-<?php
+<?php if (empty($facturen)) { ?>
 
-foreach ($facturen as $factuur) {
+<tr>
+    <td colspan="4">Geen facturen gevonden.</td>
+</tr>
 
-    echo "<tr>";
+<?php } else { ?>
 
-    echo "<td>" . $factuur['factuurdatum'] . "</td>";
+<?php foreach ($facturen as $factuur) { ?>
 
-    echo "<td>€ " . $factuur['totaalbedrag'] . "</td>";
+<tr>
 
-    echo "<td>";
+    <td>
+        <?= $factuur['factuurdatum'] ?>
+    </td>
 
-    if ($factuur['betaald'] == 1) {
-        echo "Ja";
-    } else {
-        echo "Nee";
-    }
+    <td>
+        € <?= number_format($factuur['totaalbedrag'], 2) ?>
+    </td>
 
-    echo "</td>";
+    <td>
+    <?= $facturenClass->getStatus($factuur) ?>
+</td>
 
-    echo "<td>
-    <a href='factuurDetails.php?id=" . $factuur['factuur_id'] . "'>
-    Bekijk regels
-    </a>
-    </td>";
+    <td>
+        <a href="factuurDetails.php?id=<?= $factuur['factuur_id'] ?>">
+            Bekijk factuur
+        </a>
+    </td>
 
-    echo "</tr>";
-}
+</tr>
 
-?>
+<?php } ?>
+
+<?php } ?>
 
 </table>
+
+<br><br>
+<a href="klusToevoegen.php">Nieuwe klus toevoegen?</a>
+
+
+
+</body>
 
 </html>
