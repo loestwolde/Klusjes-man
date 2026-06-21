@@ -3,33 +3,45 @@ include("../src/opzoeken.php");
 
 $zoekKlant = new KlantenZoeken();
 
-$zoekResultaat = [];
+$zoekResultaat = []; // je zoekresultaat is nu nog een lege array
 
 if (isset($_POST['zoeken'])) {
 
-    $zoekterm = $_POST['zoekterm'];
-
-    $zoekResultaat = $zoekKlant->getCustomerOnLastAndFirstName($zoekterm);
+$zoekterm = $_POST['zoekterm']; // zoekterm ophalen
+$zoekResultaat = $zoekKlant->zoekKlanten($zoekterm); // je geeft de zoekterm mee aan de functie om te zoeken
 }
 
 ?>
 
 <html>
 
+<head>
+
+<title>Zoeken</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="card">
+
+<a href="index.php" class="btn">Dashboard</a>
+
+<br><br>
+
+<div class="zoeken-form">
 <form method="post">
 
-    Zoek klant:
-    <input type="text" name="zoekterm">
+<label>Zoek klant:</label>
+<input type="text" name="zoekterm">
 
-    <button type="submit" name="zoeken">
-        Zoek klant
-    </button>
+<button type="submit" class="btn" name="zoeken">Zoek klant</button>
 
 </form>
+</div>
 
-<br>
-
-<table border="1">
+<table>
 
 <tr>
     <th>Aanhef</th>
@@ -41,7 +53,7 @@ if (isset($_POST['zoeken'])) {
 
 <?php
 
-if ($zoekResultaat) {
+if ($zoekResultaat) { // als er resultaten zijn, loop je door elk resultaat
 
     foreach ($zoekResultaat as $klant) {
 
@@ -52,7 +64,9 @@ if ($zoekResultaat) {
         echo "<td>" . $klant['achternaam'] . "</td>";
         echo "<td>" . $klant['woonplaats'] . "</td>";
 
-        echo "<td><a href='klantInfo.php?id=" . $klant['klant_id'] . "'> Bekijk</a></td>";
+       $id = $klant['klant_id']; // het id is de klant_id uit de database
+       // die geef je mee als je klantInfo wil bekijken
+        echo "<td><a class='btn' href='klantInfo.php?id=$id'>Bekijk</a></td>"; 
 
         echo "</tr>";
     }
@@ -62,4 +76,7 @@ if ($zoekResultaat) {
 
 </table>
 
+</div>
+
+</body>
 </html>
